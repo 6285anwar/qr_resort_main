@@ -1,0 +1,228 @@
+{%extends 'admin_navbar.html'%}
+{%load static%}
+{%block content%}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-12 col-12 mx-auto">
+            <div class="card card-body mt-4">
+                <h6 class="mb-0">Create Room for : {{user.fullname}}</h6>
+                <h3 id="user_id" hidden>{{user.id}}</h3>
+                <hr class="horizontal dark my-3">
+                <div class="col-lg-12 ">
+                    <div class="row" id="roomadd">
+                        <div class="col-6 text-end float-end mt-2">
+                            <h6 class="">Total Rooms</h6>
+
+                        </div>
+                        <div class="col-2">
+                            <div class="input-group">
+                                <input id="username-input" name="email" class="form-control" type="number" required >
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center mt-2">
+                            <button type="submit" name="button" class="btn bg-gradient-primary m-0 ms-2"
+                                onclick="getAmtValue()">Create Room</button>
+                        </div>
+                    </div>
+
+                    <div class="row" id="totalroom" hidden>
+                        <div class="d-flex justify-content-center mt-2">
+                            <h6 id="your-h6-id"></h6>
+                        </div>
+                    </div>
+                </div>
+                <hr class="horizontal dark my-3">
+
+                <div class="col-lg-12 text-center">
+                    <div class="d-flex justify-content-center mt-2">
+                        <form id="myForm" method="post">
+                            {% csrf_token %}
+                            <div class="col" id="room_number">
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="s_btn" hidden>Submit</button>
+                        </form>
+                    </div>
+                </div>
+
+
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script>
+                    $(document).ready(function () {
+                      $('#myForm').submit(function (e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        var formSerialized = form.serialize(); // Renamed formData to formSerialized
+                        var h6Element = document.getElementById('your-h6-id');
+                        var value = h6Element.innerHTML;
+                        console.log('value=', value);
+                  
+                        var h13Element = document.getElementById('user_id');
+                        var id_value1 = h13Element.innerHTML;
+                        console.log("room number id " + id_value1);
+                  
+                        var formData = new FormData(); // Create a new FormData object
+                  
+                        formData.append('id_value1', id_value1); // Add id_value1 to formData
+                  
+                        for (var i = 1; i <= value; i++) {
+                          var roomNo = $('#room_no_' + i).val();
+                          formData.append('room_no_' + i, roomNo);
+                        }
+
+
+                        console.log(window.location.href)
+           
+                        var url = new URL(window.location.href);
+                        var baseURL = url.origin;
+
+                        console.log(baseURL);
+
+                  
+                        console.log(formData);
+                        $.ajax({
+                          type: 'POST',
+                          url: "{% url 'admin_room_number' %}",
+                          data: formData,
+                          processData: false, // Prevents jQuery from automatically processing the data
+                          contentType: false, // Prevents jQuery from setting content type
+                          beforeSend: function (xhr, settings) {
+                            xhr.setRequestHeader("X-CSRFToken", getCSRFToken());
+                          },
+                          success: function (response) {
+                            // Handle the successful response
+                            console.log(response);
+                            window.location.href =  baseURL+"/admin_room_qr_file_upload/"+id_value1;
+                          },
+                          error: function (xhr) {
+                            // Handle the error
+                            console.log(xhr.responseText);
+                          }
+                        });
+                      });
+                    });
+                  
+                    function getCSRFToken() {
+                      const cookieValue = document.cookie
+                        .split('; ')
+                        .find(row => row.startsWith('csrftoken='))
+                        .split('=')[1];
+                      return cookieValue;
+                    }
+                  </script>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function getAmtValue() {
+            var amt = document.getElementById("username-input").value;
+            console.log("Value from input : " + amt);
+
+            
+
+            var h3Element = document.getElementById('user_id');
+            var id_value = h3Element.innerHTML;
+            console.log("======================== " + id_value);
+
+
+
+            $.ajax({
+                type: "GET",
+                url: "{% url 'admin_room_count' %}",
+                data: {
+                    "nick_name": amt,
+                    "user_id": id_value,
+                },
+                success: function (data) {
+                    var room_count = $("#username-input").val();
+                    $("#roomadd").hide();
+                    $("#totalroom").removeAttr("hidden");
+                    $("#s_btn").removeAttr("hidden");
+                    $("#your-h6-id").text(room_count);
+                    room_num(room_count)
+                    // input_boxes(room_count);
+                }
+            });
+            return false;
+        };
+
+        function room_num(room_count) {
+            var value = room_count
+            var r_n = document.getElementById('room_number');
+
+            r_n.innerHTML = '';
+            for (i = 1; i <= value; i++) {
+                var inputBox = document.createElement('input');
+                inputBox.type = 'text';
+                inputBox.id = 'room_no_' + i;
+                inputBox.name = 'room_no_' + i;
+                inputBox.className = 'form-control';
+                inputBox.placeholder = 'Room Number';
+                inputBox.autocomplete = 'off';
+
+                r_n.appendChild(inputBox);
+                r_n.appendChild(document.createElement('br'));
+
+            }
+
+
+        }
+
+
+
+        // function input_boxes(room_count) {
+        //     var value = room_count
+        //     var output = document.getElementById('output');
+        //     var output1 = document.getElementById('output1');
+
+
+        //     output.innerHTML = '';
+        //     for (i = 1; i <= value; i++) {
+        //         var inputBox = document.createElement('input');
+        //         inputBox.type = 'text';
+        //         inputBox.id = 'room_url_' + i;
+        //         inputBox.name = 'room_url_' + i;
+        //         inputBox.className = 'form-control';
+        //         inputBox.value = window.location.href + '/';
+
+
+        //         output.appendChild(inputBox);
+        //         output.appendChild(document.createElement('br'));
+
+        //     }
+        //     output1.innerHTML = '';
+        //     for (var i = 1; i <= value; i++) {
+        //         var inputBox = document.createElement('input');
+        //         inputBox.type = 'file';
+        //         inputBox.id = 'room_qr_' + i;
+        //         inputBox.name = 'room_qr_' + i;
+        //         inputBox.className = 'form-control';
+        //         output1.appendChild(inputBox);
+        //         output1.appendChild(document.createElement('br'));
+
+        //     }
+        // }
+
+
+
+
+    </script>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

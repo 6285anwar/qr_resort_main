@@ -1,0 +1,71 @@
+{%extends 'admin_navbar.html'%}
+{%load static%}
+{%block content%}
+
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-12 col-12 mx-auto">
+            <div class="card card-body mt-4">
+                <h6 class="mb-0">Add QR Files {{id_pass}} </h6>
+
+                <hr class="horizontal dark my-3">
+
+                <div class="row mb-2">
+                    <div class="col-2 text-start">
+                        <label class="form-label">Room_No.
+                        </label>
+
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label">QR URL</label>
+
+                    </div>
+                    <div class="col-4 ">
+                        <label class="form-label">QR-CODE</label>
+
+                    </div>
+                    <div class="col-1">
+                        <label class="form-label"></label>
+
+                    </div>
+                </div>
+                
+
+                {% for i in qr %}
+                <form action="{% url 'admin_room_qr_file_upload_save' i.id %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row mb-2">
+                        <div class="col-1 text-center justify-content-center align-items-center mt-1">
+                            <h5>{{i.room_number}}</h5>
+                        </div>
+                        <div class="col-5">
+                            <input class="form-control" type="text" value="{{i.qr_url}}" readonly>
+                        </div>
+                        {% if i.qr_file_status == 'no_files' %}
+                        <div class="col-4">
+                            <input class="form-control" type="file" name="qr_file">
+                            
+                        </div>
+                        {% else %}
+                        <div class="col-4 text-center justify-content-center align-items-center">
+                            <img src="{{i.qr_code.url}}" alt="" width="40px">
+                            <!-- <input class="form-control" type="text" name="qr_file" value="{{i.qr_code}}"> -->
+                        </div>
+                        {% endif %}
+                        <div class="col-2">
+                            <button type="submit" name="button" class="btn bg-gradient-primary">Save</button>
+                        </div>
+                    </div>
+                </form>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}
